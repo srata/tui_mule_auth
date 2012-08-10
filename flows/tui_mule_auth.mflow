@@ -1,0 +1,852 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<mule-configuration xmlns="http://www.mulesoft.com/tooling/messageflow" name="tui_mule_auth">
+    <global-element type="http://www.springframework.org/schema/context/property-placeholder" name="Property Placeholder" entity-id="549f6ecd-9a00-45dc-b5ec-6f0b4afc4959">
+        <properties>
+            <property value="classpath:mule-app-default.properties,classpath:mule-app-${env}.properties" name="location"/>
+        </properties>
+    </global-element>
+    <global-element type="http://www.mulesoft.org/schema/mule/mongo/config" name="MongoDB-CloudConnector" entity-id="0973bf00-0974-44dd-88ba-76b3195f1dce">
+        <properties>
+            <property value="MongoDB-CloudConnector" name="name"/>
+            <property name="username"/>
+            <property name="password"/>
+            <property name="host"/>
+            <property name="port"/>
+            <property value="TuiMarine" name="database"/>
+            <property name="connectTimeout"/>
+            <property name="connectionsPerHost"/>
+            <property name="maxWaitTime"/>
+            <property name="socketTimeout"/>
+            <property name="threadsAllowedToBlockForConnectionMultiplier"/>
+            <property name="w"/>
+            <property name="wtimeout"/>
+            <property name="autoConnectRetry"/>
+            <property name="fsync"/>
+            <property name="safe"/>
+            <property name="slaveOk"/>
+        </properties>
+    </global-element>
+    <flow SubFlow="false" name="tui_mule_auth">
+        <properties>
+            <property name="processingStrategy2"/>
+            <property name="processingStrategy"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+        </properties>
+        <lane hadOnlyOneElement="false" entity-id="1ce8b8a0-375f-45aa-adfe-39f3e77ab4b1">
+            <endpoint message-exchange-pattern="OneWay" direction="Inbound" type="http://www.mulesoft.org/schema/mule/http/endpoint" name="HTTP" entity-id="256b07e4-2ccd-4bab-8f3b-154a9afe2db6">
+                <properties>
+                    <property value="one-way" name="exchange-pattern"/>
+                    <property value="request-response" name="exchange-pattern"/>
+                    <property value="http://www.mulesoft.org/schema/mule/http/endpoint" name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute"/>
+                    <property name="httpLabel"/>
+                    <property value="localhost" name="host"/>
+                    <property value="8081" name="port"/>
+                    <property value="api" name="path"/>
+                    <property name="method"/>
+                    <property name="businessEventsLabel"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="address"/>
+                    <property name="encoding"/>
+                    <property name="disableTransportTransformer"/>
+                    <property name="mimeType"/>
+                    <property name="responseTimeout"/>
+                    <property name="followRedirects"/>
+                    <property name="connector-ref"/>
+                    <property name="ref"/>
+                    <property name="transformer-refs"/>
+                    <property name="responseTransformer-refs"/>
+                    <property name="user"/>
+                    <property name="password"/>
+                    <property name="contentType"/>
+                    <property name="keep-alive"/>
+                </properties>
+            </endpoint>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="QRY Params Logger" entity-id="864a00d8-204d-4040-b631-f338c18f4190">
+                <properties>
+                    <property value="QUERY PARAMS: #[headers:INBOUND:*]" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+                <description>will http.cookie show up here if cookie is sent to flow?</description>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Log Inbound Payload" entity-id="fd8082ae-cdda-4f83-8535-148282087c13">
+                <properties>
+                    <property value="INBOUND PAYLOAD: #[payload:]" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="Set Session Props" entity-id="6c4e9d20-3a6c-4f04-b0ae-77e4b801bb41">
+                <properties>
+                    <property value="" name="returnClass"/>
+                    <property value="false" name="ignoreBadInput"/>
+                    <property value="// ignore the first /&#xA;// and split by / the rest of the message&#xA;msgArr = payload[1..-1].split('/')&#xA;//println 'msgArr: ' + msgArr&#xA;&#xA;// msgArr[0] should always contain: 'api'&#xA;if (msgArr[0]=='api') {&#xA;&#x9;message.setSessionProperty('API-VALID', true)&#xA;    // Error handling: test that msgArr[n] is not null&#xA;&#x9;message.setSessionProperty('API-CLASS', msgArr[1])&#xA;&#x9;message.setSessionProperty('API-METHOD', msgArr[2]) &#xA;&#x9;message.setSessionProperty('API-METHOD-ARGS', msgArr[3])&#xA;&#x9;// remove /api/ at the front of the message&#xA;&#x9;return payload[5..-1]&#xA;}&#xA;else {&#xA;    // this is not a proper api invocation&#xA;&#x9;// set FALSE to ISVALID message property&#xA;&#x9;message.setSessionProperty('IS-VALID', false)&#xA;&#x9;message.setSessionProperty('API-CLASS', null)&#xA;&#x9;message.setSessionProperty('API-METHOD', null) &#xA;&#x9;message.setSessionProperty('API-METHOD-ARGS', null)&#xA;    return  payload&#xA;}" name="text"/>
+                    <property value="" name="encoding"/>
+                    <property value="" name="mimeType"/>
+                    <property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;1594025746">
+                        <property value="// ignore the first /&#xA;// and split by / the rest of the message&#xA;msgArr = payload[1..-1].split('/')&#xA;//println 'msgArr: ' + msgArr&#xA;&#xA;// msgArr[0] should always contain: 'api'&#xA;if (msgArr[0]=='api') {&#xA;&#x9;message.setSessionProperty('API-VALID', true)&#xA;    // Error handling: test that msgArr[n] is not null&#xA;&#x9;message.setSessionProperty('API-CLASS', msgArr[1])&#xA;&#x9;message.setSessionProperty('API-METHOD', msgArr[2]) &#xA;&#x9;message.setSessionProperty('API-METHOD-ARGS', msgArr[3])&#xA;&#x9;// remove /api/ at the front of the message&#xA;&#x9;return payload[5..-1]&#xA;}&#xA;else {&#xA;    // this is not a proper api invocation&#xA;&#x9;// set FALSE to ISVALID message property&#xA;&#x9;message.setSessionProperty('IS-VALID', false)&#xA;&#x9;message.setSessionProperty('API-CLASS', null)&#xA;&#x9;message.setSessionProperty('API-METHOD', null) &#xA;&#x9;message.setSessionProperty('API-METHOD-ARGS', null)&#xA;    return  payload&#xA;}" name="text"/>
+                    </property-collection>
+                </properties>
+                <description></description>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Confirm Session Props" entity-id="b30f7e46-6062-4ab3-93bd-bd67d8879898">
+                <properties>
+                    <property value="INBOUND AFTER GROOVY: #[payload:]; API-VALID: #[groovy:message.getSessionProperty('API-VALID')];API-CLASS: #[groovy:message.getSessionProperty('API-CLASS')]; API-METHOD: #[groovy:message.getSessionProperty('API-METHOD')]; API-METHOD-ARGS: #[groovy:message.getSessionProperty('API-METHOD-ARGS')]" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/expression-transformer" name="OnlyArgs" entity-id="2694ce35-0ae6-44d6-8259-975719bc637d">
+                <properties>
+                    <property name="returnClass"/>
+                    <property name="ignoreBadInput"/>
+                    <property name="encoding"/>
+                    <property name="mimeType"/>
+                    <property name="evaluator"/>
+                    <property value="#[header:session:API-METHOD-ARGS]" name="expression"/>
+                    <property name="custom-evaluator"/>
+                    <property name="returnSourceIfNull"/>
+                </properties>
+            </pattern>
+            <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="4df24398-1d11-4b88-9504-5055131e1cb5">
+                <properties>
+                    <property-collection name="30b0c3af-4337-4685-9100-d8b25d02a620">
+                        <property value="true" name="choice.otherwise"/>
+                    </property-collection>
+                    <property-collection name="a2cbeb89-41e6-4103-ac83-3b05dd61a969">
+                        <property value="message.inboundProperties['apikey'] !='' &amp;&amp; message.inboundProperties['token'] ==null" name="choice.expression"/>
+                    </property-collection>
+                    <property-collection name="089bec65-0b16-4444-a2e6-689a75eb5b34">
+                        <property value="message.inboundProperties['token'] !='' &amp;&amp; message.inboundProperties['apikey'] == null" name="choice.expression"/>
+                    </property-collection>
+                </properties>
+                <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="63d9dfda-b0ea-41cd-9ed5-e32e21111e01">
+                    <properties>
+                        <property-collection name="30b0c3af-4337-4685-9100-d8b25d02a620">
+                            <property value="true" name="choice.otherwise"/>
+                        </property-collection>
+                        <property-collection name="a2cbeb89-41e6-4103-ac83-3b05dd61a969">
+                            <property value="message.inboundProperties['apikey'] !='' &amp;&amp; message.inboundProperties['token'] ==null" name="choice.expression"/>
+                        </property-collection>
+                        <property-collection name="089bec65-0b16-4444-a2e6-689a75eb5b34">
+                            <property value="message.inboundProperties['token'] !='' &amp;&amp; message.inboundProperties['apikey'] == null" name="choice.expression"/>
+                        </property-collection>
+                    </properties>
+                </pattern>
+                <compartment entity-id="fc522128-d335-4209-af62-52b4b6016934">
+                    <lane hadOnlyOneElement="false" entity-id="a2cbeb89-41e6-4103-ac83-3b05dd61a969">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-APIKEY-passed" entity-id="e37a83ff-0d29-4d67-a45b-3f17835dd978">
+                            <properties>
+<property value="IN APIKEY Branch: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="Add-Channel-Port-Session-Props-return-apikey" entity-id="7c3722a6-38b2-44cd-ad0c-11a08cec787c">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+<property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;0">
+    <property value="sessionVars['TRITON-CHANNEL']=message.getInboundProperty('channel')&#xA;if (sessionVars['TRITON-CHANNEL']=='M')&#xA;&#x9;sessionVars['TRITON-PORT']=${triton.moorings.port}&#xA;else {&#xA;&#x9;if (sessionVars['TRITON-CHANNEL']=='S')&#xA;&#x9;&#x9;sessionVars['TRITON-PORT']=${triton.sunsail.port}&#xA;&#x9;else&#xA;&#x9;&#x9;sessionVars['TRITON-PORT']=0&#xA;}&#xA;return message.getInboundProperty('apikey')" name="text"/>
+    <property value="Groovy" name="engine"/>
+    <property value="true" name="isProcessed$$$$"/>
+</property-collection>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-Channel-Port" entity-id="c8043341-8199-4cd2-9474-4297bdca9ab3">
+                            <properties>
+<property value="TRITON-CHANNEL: #[sessionVars['TRITON-CHANNEL']] / TRITON-PORT: #[sessionVars['TRITON-PORT']] / Payload: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Authenticate With ApiKey" entity-id="ce97a284-749b-471b-9db4-b9c86845c68f">
+                            <properties>
+<property value="AuthenticateWithApiKey" name="name"/>
+                            </properties>
+                        </pattern>
+                        <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="e4e84ce2-f804-4697-891b-379f6942dc6f">
+                            <properties>
+<property-collection name="c0f4a311-5bf2-4ca7-86f4-9a02c3f18131">
+    <property value="true" name="choice.otherwise"/>
+</property-collection>
+<property-collection name="a1c07e6f-46e7-4154-be12-642fb9f5690e">
+    <property value="payload==false" name="choice.expression"/>
+</property-collection>
+                            </properties>
+                            <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="b6e1f366-8928-493c-b10b-8390f935cb1f">
+<properties>
+    <property-collection name="c0f4a311-5bf2-4ca7-86f4-9a02c3f18131">
+        <property value="true" name="choice.otherwise"/>
+    </property-collection>
+    <property-collection name="a1c07e6f-46e7-4154-be12-642fb9f5690e">
+        <property value="payload==false" name="choice.expression"/>
+    </property-collection>
+</properties>
+                            </pattern>
+                            <compartment entity-id="cc92611e-83e8-45a2-82d7-bbb780ff3c83">
+<lane hadOnlyOneElement="false" entity-id="a1c07e6f-46e7-4154-be12-642fb9f5690e">
+    <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="Return Error payload" entity-id="f88f2fc0-97a1-40b3-b4b9-27bc3d4260fc">
+        <properties>
+            <property name="returnClass"/>
+            <property name="ignoreBadInput"/>
+            <property name="encoding"/>
+            <property name="mimeType"/>
+            <property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;0">
+                <property value="errorPayloadstr = '&lt;?xml version=&quot;1.0&quot; standalone=&quot;yes&quot;?&gt;&lt;Auth&gt;&lt;AS400&gt;Active&lt;/AS400&gt;&lt;ApiKey&gt;foobarfoobarfoobar&lt;/ApiKey&gt;&lt;Status&gt;0&lt;/Status&gt;&lt;Error&gt;Invalid ApiKey&lt;/Error&gt;&lt;Token&gt;&lt;/Token&gt;&lt;/Auth&gt;'&#xA;return errorPayloadstr" name="text"/>
+                <property value="Groovy" name="engine"/>
+                <property value="true" name="isProcessed$$$$"/>
+            </property-collection>
+        </properties>
+    </pattern>
+    <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-FailingAuthXMLResponse-Apikey" entity-id="ab798591-dd5c-4f1c-a4b7-c4c4ed4f009a">
+        <properties>
+            <property value="FailingAuthXMLResponse (apikey branch): #[payload:]" name="message"/>
+            <property value="INFO" name="level"/>
+            <property name="category"/>
+        </properties>
+    </pattern>
+</lane>
+<lane hadOnlyOneElement="false" entity-id="c0f4a311-5bf2-4ca7-86f4-9a02c3f18131">
+    <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/vm/endpoint" name="VM-mule-triton-stub-1" entity-id="964b9842-529b-4e68-b072-46c1364bab56">
+        <properties>
+            <property value="one-way" name="exchange-pattern"/>
+            <property value="request-response" name="exchange-pattern"/>
+            <property value="triton.stub.Q.1" name="path"/>
+            <property name="businessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+            <property name="address"/>
+            <property name="responseTimeout"/>
+            <property name="encoding"/>
+            <property name="disableTransportTransformer"/>
+            <property name="mimeType"/>
+            <property name="connector-ref"/>
+            <property name="ref"/>
+            <property name="transformer-refs"/>
+            <property name="responseTransformer-refs"/>
+        </properties>
+    </endpoint>
+    <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-TritonStubResponse" entity-id="70bdfca3-8311-42fe-92f9-9b456ea98e6f">
+        <properties>
+            <property value="TritonStubResponse: #[payload:]" name="message"/>
+            <property value="INFO" name="level"/>
+            <property name="category"/>
+        </properties>
+    </pattern>
+</lane>
+                            </compartment>
+                        </splitter>
+                    </lane>
+                    <lane hadOnlyOneElement="false" entity-id="089bec65-0b16-4444-a2e6-689a75eb5b34">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-TOKEN-passed" entity-id="47a03c2c-a10a-490c-9842-c73420fb949f">
+                            <properties>
+<property value="IN TOKEN Branch: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="Add-Channel-Port-Session-Props-return-token" entity-id="ac484b86-f68a-4794-abba-c0d80078297e">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+<property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;0">
+    <property value="sessionVars['TRITON-CHANNEL']=message.getInboundProperty('channel')&#xA;if (sessionVars['TRITON-CHANNEL']=='M')&#xA;&#x9;sessionVars['TRITON-PORT']=${triton.moorings.port}&#xA;else {&#xA;&#x9;if (sessionVars['TRITON-CHANNEL']=='S')&#xA;&#x9;&#x9;sessionVars['TRITON-PORT']=${triton.sunsail.port}&#xA;&#x9;else&#xA;&#x9;&#x9;sessionVars['TRITON-PORT']=0&#xA;}&#xA;return message.getInboundProperty('token')" name="text"/>
+    <property value="Groovy" name="engine"/>
+    <property value="true" name="isProcessed$$$$"/>
+</property-collection>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-Channel-Port" entity-id="4edfb924-8ca7-477c-9d38-5bc70277df3b">
+                            <properties>
+<property value="TRITON-CHANNEL: #[sessionVars['TRITON-CHANNEL']] / TRITON-PORT: #[sessionVars['TRITON-PORT']] / Payload: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Authenticate with Token" entity-id="62e4b951-adad-492c-8df5-6979032f6d7f">
+                            <properties>
+<property value="AuthenticateWithToken" name="name"/>
+                            </properties>
+                        </pattern>
+                        <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="2b7f7cf1-d17e-47a5-a2ea-e378e12d8925">
+                            <properties>
+<property-collection name="a67dcb09-0a70-4c62-9bed-5caf96763f7b">
+    <property value="payload==false" name="choice.expression"/>
+</property-collection>
+<property-collection name="96ad3243-bc23-478d-9b40-c7efc734da5e">
+    <property value="true" name="choice.otherwise"/>
+</property-collection>
+                            </properties>
+                            <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="312a24b5-f596-437c-be18-a8c7a865fe90">
+<properties>
+    <property-collection name="a67dcb09-0a70-4c62-9bed-5caf96763f7b">
+        <property value="payload==false" name="choice.expression"/>
+    </property-collection>
+    <property-collection name="96ad3243-bc23-478d-9b40-c7efc734da5e">
+        <property value="true" name="choice.otherwise"/>
+    </property-collection>
+</properties>
+                            </pattern>
+                            <compartment entity-id="25fb7ceb-d45f-4621-aab0-d484a19e7e82">
+<lane hadOnlyOneElement="false" entity-id="a67dcb09-0a70-4c62-9bed-5caf96763f7b">
+    <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="Return Error payload" entity-id="c20b47a2-81dd-4502-b04f-7981ae1c501d">
+        <properties>
+            <property name="returnClass"/>
+            <property name="ignoreBadInput"/>
+            <property name="encoding"/>
+            <property name="mimeType"/>
+            <property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;0">
+                <property value="errorPayloadstr = '&lt;?xml version=&quot;1.0&quot; standalone=&quot;yes&quot;?&gt;&lt;Auth&gt;&lt;AS400&gt;Active&lt;/AS400&gt;&lt;ApiKey&gt;foobarfoobarfoobar&lt;/ApiKey&gt;&lt;Status&gt;0&lt;/Status&gt;&lt;Error&gt;Invalid ApiKey&lt;/Error&gt;&lt;Token&gt;&lt;/Token&gt;&lt;/Auth&gt;'&#xA;return errorPayloadstr" name="text"/>
+                <property value="Groovy" name="engine"/>
+                <property value="true" name="isProcessed$$$$"/>
+            </property-collection>
+        </properties>
+    </pattern>
+    <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-FailingAuthXMLResponse-Token" entity-id="e55fd587-116a-4a59-a1f6-538089588ea7">
+        <properties>
+            <property value="FailingAuthXMLResponse (Token branch): #[payload:]" name="message"/>
+            <property value="INFO" name="level"/>
+            <property name="category"/>
+        </properties>
+    </pattern>
+</lane>
+<lane hadOnlyOneElement="false" entity-id="96ad3243-bc23-478d-9b40-c7efc734da5e">
+    <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="ParseArgsOneMoreTime" entity-id="86ec123d-3eb3-4973-8053-e19577ff84d3">
+        <properties>
+            <property name="returnClass"/>
+            <property name="ignoreBadInput"/>
+            <property name="encoding"/>
+            <property name="mimeType"/>
+            <property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;0">
+                <property value="// remove a few vars from the args String&#xA;&#x9;&#x9;// apikey, token &amp; channel&#xA;&#x9;&#x9;&#xA;&#x9;&#x9;tmp = message.getSessionProperty('API-METHOD-ARGS')&#xA;&#x9;&#x9;//println 'tmp: ' + tmp&#xA;&#x9;&#x9;&#xA;&#x9;&#x9;// split args by &amp;&#xA;&#x9;&#x9;// and ignore the ? (first character)&#xA;&#x9;&#x9;argsArr = tmp[1..-1].split('&amp;')&#xA;&#x9;&#x9;//println 'argsArr: ' + argsArr&#xA;&#x9;&#x9;// e.g.  msgArr: [token=838481, channel=S, brand=B]&#xA;&#x9;&#x9;tmp2='?'&#xA;&#x9;&#x9;for ( foo in argsArr ) {&#xA;&#x9;&#x9;&#x9;// split by '='&#xA;&#x9;&#x9;&#x9;argsArr2 = foo.split('=')&#xA;&#x9;&#x9;&#x9;//println 'element name: ' + argsArr2[0]&#xA;&#x9;&#x9;    if ( (argsArr2[0].trim()!='apikey') &amp;&amp; (argsArr2[0].trim()!='token') &amp;&amp; (argsArr2[0].trim()!='channel') ) {&#xA;&#x9;&#x9;&#x9;&#x9;// element is not api'key', not 'token', not 'channel'&#xA;&#x9;&#x9;&#x9;&#x9;tmp2 = tmp2 + foo + '&amp;'&#xA;&#x9;&#x9;&#x9;}&#xA;&#x9;&#x9;}&#xA;&#x9;&#x9;//println 'tmp2: ' + tmp2&#xA;&#x9;&#x9;if (tmp2.length() &gt; 1) {&#xA;&#x9;&#x9;&#x9;message.setSessionProperty('API-METHOD-ARGS', tmp2[0..-2])&#xA;&#x9;&#x9;}&#xA;&#x9;&#x9;println &quot;sessionVars['API-METHOD-ARGS'] was updated to: &quot; + sessionVars['API-METHOD-ARGS']&#xA;&#x9;&#x9;return  payload" name="text"/>
+                <property value="Groovy" name="engine"/>
+                <property value="true" name="isProcessed$$$$"/>
+            </property-collection>
+        </properties>
+    </pattern>
+    <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Confirm Updated Session Prop (API-METHOD-ARGS')" entity-id="e99f0037-1a87-4043-986c-954536688f5e">
+        <properties>
+            <property value="Updated API-METHOD-ARGS: #[groovy:message.getSessionProperty('API-METHOD-ARGS')]" name="message"/>
+            <property value="INFO" name="level"/>
+            <property name="category"/>
+        </properties>
+    </pattern>
+    <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/vm/endpoint" name="VM-mule-triton-stub-2" entity-id="95662baf-ee6d-4400-aba4-290c14ac4b25">
+        <properties>
+            <property value="one-way" name="exchange-pattern"/>
+            <property value="request-response" name="exchange-pattern"/>
+            <property value="triton.stub.Q.2" name="path"/>
+            <property name="businessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+            <property name="address"/>
+            <property name="responseTimeout"/>
+            <property name="encoding"/>
+            <property name="disableTransportTransformer"/>
+            <property name="mimeType"/>
+            <property name="connector-ref"/>
+            <property name="ref"/>
+            <property name="transformer-refs"/>
+            <property name="responseTransformer-refs"/>
+        </properties>
+    </endpoint>
+    <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-TritonStubResponse" entity-id="46717fc9-7db2-46af-866d-2dcdbeda8634">
+        <properties>
+            <property value="TritonStubResponse: #[payload:]" name="message"/>
+            <property value="INFO" name="level"/>
+            <property name="category"/>
+        </properties>
+    </pattern>
+</lane>
+                            </compartment>
+                        </splitter>
+                    </lane>
+                    <lane hadOnlyOneElement="false" entity-id="30b0c3af-4337-4685-9100-d8b25d02a620">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="InvalidAuthentication" entity-id="919a5a01-319e-4e0c-96a7-00729a16b361">
+                            <properties>
+<property value="InvalidAuthentication" name="name"/>
+                            </properties>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </splitter>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/object-to-string-transformer" name="Object to String" entity-id="39ed8412-b86d-4416-a62d-1136d0ec2817">
+                <properties>
+                    <property name="returnClass"/>
+                    <property name="ignoreBadInput"/>
+                    <property name="encoding"/>
+                    <property name="mimeType"/>
+                </properties>
+            </pattern>
+        </lane>
+    </flow>
+    <flow SubFlow="false" name="AuthenticateWithApiKey">
+        <properties>
+            <property name="processingStrategy2"/>
+            <property name="processingStrategy"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+        </properties>
+        <lane hadOnlyOneElement="false" entity-id="7c93a9a4-70fd-497f-9eda-bab219b60044">
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="6f055735-7c0c-4f23-b9a1-01d45d5aca03">
+                <properties>
+                    <property value="Payload Entering AuthenticateWithApiKey flow: #[payload:]" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/mongo/mongo-connector" name="MongoDB-find-apikey" entity-id="0b2b4087-3091-476a-adf3-b02cc894133f">
+                <properties>
+                    <property value="MongoDB-CloudConnector" name="config-ref"/>
+                    <property value="http://www.mulesoft.org/schema/mule/mongo/find-one-object-using-query-map" name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute"/>
+                    <property value="MongoDB-CloudConnector" name="config-ref"/>
+                    <property value="authentication" name="collection"/>
+                    <property name=""/>
+                    <property value="admin" name="username"/>
+                    <property value="admin" name="password"/>
+                    <property-collection name="@http://www.mulesoft.org/schema/mule/mongo/find-one-object-using-query-map-query-attributess;0">
+                        <property-collection name="@http://www.mulesoft.org/schema/mule/mongo/find-one-object-using-query-map-query-attributes;1">
+                            <property value="#[payload:]" name="value"/>
+                            <property value="apikey" name="key"/>
+                        </property-collection>
+                    </property-collection>
+                </properties>
+            </pattern>
+            <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="2be384ce-cc9a-4ddd-b899-0649009ce2fd">
+                <properties>
+                    <property-collection name="79a4bd61-083a-463f-ab45-196fa2b76d98">
+                        <property value="payload != null" name="choice.expression"/>
+                    </property-collection>
+                    <property-collection name="e31da635-6c8d-48b6-872c-75139a0e92e6">
+                        <property value="true" name="choice.otherwise"/>
+                    </property-collection>
+                </properties>
+                <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="b3257e10-0895-4472-8fb4-802dd5e9af65">
+                    <properties>
+                        <property-collection name="79a4bd61-083a-463f-ab45-196fa2b76d98">
+                            <property value="payload != null" name="choice.expression"/>
+                        </property-collection>
+                        <property-collection name="e31da635-6c8d-48b6-872c-75139a0e92e6">
+                            <property value="true" name="choice.otherwise"/>
+                        </property-collection>
+                    </properties>
+                </pattern>
+                <compartment entity-id="498f249f-f54a-4be5-aa04-f193b79137d9">
+                    <lane hadOnlyOneElement="false" entity-id="79a4bd61-083a-463f-ab45-196fa2b76d98">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="15c8e4b3-7802-49ad-bc0a-93296dc55baf">
+                            <properties>
+<property value="Found ApiKey in Cache was successful, new payload: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="Set-tritonLoginArgs" entity-id="fc276296-a8ef-47bf-b9f8-b93c9f246ab4">
+                            <properties>
+<property value="" name="returnClass"/>
+<property value="false" name="ignoreBadInput"/>
+<property value="// overwrite the public URL Args with the private ones (triton compatible)&#xA;tritonLoginArgs = &quot;?Username=&quot; + payload.username.value + &quot;&amp;Password=&quot; + payload.password.value + &quot;&amp;ApiKey=&quot; + payload.apikey.value&#xA;return tritonLoginArgs" name="text"/>
+<property value="" name="encoding"/>
+<property value="" name="mimeType"/>
+<property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;887114790">
+    <property value="// overwrite the public URL Args with the private ones (triton compatible)&#xA;tritonLoginArgs = &quot;?Username=&quot; + payload.username.value + &quot;&amp;Password=&quot; + payload.password.value + &quot;&amp;ApiKey=&quot; + payload.apikey.value&#xA;return tritonLoginArgs" name="text"/>
+    <property value="true" name="isProcessed$$$$"/>
+</property-collection>
+                            </properties>
+                            <description></description>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-Auth-Success-w-Apikey" entity-id="11242eb3-31fa-42ea-8c3f-2fac42670e9c">
+                            <properties>
+<property value="Authenticate OK w APIKEY: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                    </lane>
+                    <lane hadOnlyOneElement="false" entity-id="e31da635-6c8d-48b6-872c-75139a0e92e6">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/object-to-string-transformer" name="Object to String" entity-id="7705f0e4-d595-4788-a697-c7cf14493b3f">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Auth Failed Logger" entity-id="b3fcb0cd-8526-440d-b419-829e3d95fc3d">
+                            <properties>
+<property value="No Auth Object returned: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/expression-transformer" name="Expression" entity-id="fd44db4d-8f7f-4f46-b7fe-f49be9a0c7e9">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+<property value="groovy" name="evaluator"/>
+<property value="false" name="expression"/>
+<property name="custom-evaluator"/>
+<property name="returnSourceIfNull"/>
+                            </properties>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </splitter>
+            <scope type="http://www.mulesoft.org/schema/mule/core/catch-exception-strategy" name="Catch Exception Strategy" entity-id="6e3bcddc-50c9-479b-a3f4-2f638c3a6abe">
+                <properties>
+                    <property name=""/>
+                    <property name="when"/>
+                    <property name="enableNotifications"/>
+                </properties>
+                <compartment entity-id="11669f09-a8dd-4b9a-8a7d-83de1ee8bdbf">
+                    <lane hadOnlyOneElement="false" entity-id="787df1a7-8fd7-49b6-9d5e-3030b2dc66da">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="d2f5fb24-f3d4-4d84-9caa-2b0396ccea5e">
+                            <properties>
+<property value="Exception: Could not connect to MongoDB  (Auth by ApiKey)" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/expression-transformer" name="FALSE" entity-id="a878123a-b0ae-4981-8282-21a127e4d9bc">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+<property value="groovy" name="evaluator"/>
+<property value="false" name="expression"/>
+<property name="custom-evaluator"/>
+<property name="returnSourceIfNull"/>
+                            </properties>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </scope>
+        </lane>
+    </flow>
+    <flow SubFlow="false" name="AuthenticateWithToken">
+        <properties>
+            <property name="processingStrategy2"/>
+            <property name="processingStrategy"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+        </properties>
+        <lane hadOnlyOneElement="false" entity-id="b3f1f812-c1d5-4065-9b3e-16cb9b6f12f3">
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="564b3105-b924-4a3e-a2b3-55a51ebec117">
+                <properties>
+                    <property value="Inside Flow AuthenticateWithToken, payload: #[payload:]" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/mongo/mongo-connector" name="MongoDB-find-apikey" entity-id="b92a0c22-6e75-4a41-bf75-05821f918c16">
+                <properties>
+                    <property value="MongoDB-CloudConnector" name="config-ref"/>
+                    <property value="http://www.mulesoft.org/schema/mule/mongo/find-one-object-using-query-map" name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute"/>
+                    <property value="MongoDB-CloudConnector" name="config-ref"/>
+                    <property value="authentication" name="collection"/>
+                    <property name=""/>
+                    <property value="admin" name="username"/>
+                    <property value="admin" name="password"/>
+                    <property-collection name="@http://www.mulesoft.org/schema/mule/mongo/find-one-object-using-query-map-query-attributess;0">
+                        <property-collection name="@http://www.mulesoft.org/schema/mule/mongo/find-one-object-using-query-map-query-attributes;1">
+                            <property value="#[payload:]" name="value"/>
+                            <property value="pseudocode" name="key"/>
+                        </property-collection>
+                    </property-collection>
+                </properties>
+            </pattern>
+            <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="ca23e9d9-ffb2-4b40-9e09-35008e298e1e">
+                <properties>
+                    <property-collection name="84bf2f32-cf5b-4635-805a-461cbd671780">
+                        <property value="payload!=null" name="choice.expression"/>
+                    </property-collection>
+                    <property-collection name="c492a310-577c-4830-b745-29010b3b5e29">
+                        <property value="true" name="choice.otherwise"/>
+                    </property-collection>
+                </properties>
+                <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="40e82f4b-9351-44cb-8da8-be490853d47a">
+                    <properties>
+                        <property-collection name="84bf2f32-cf5b-4635-805a-461cbd671780">
+                            <property value="payload!=null" name="choice.expression"/>
+                        </property-collection>
+                        <property-collection name="c492a310-577c-4830-b745-29010b3b5e29">
+                            <property value="true" name="choice.otherwise"/>
+                        </property-collection>
+                    </properties>
+                </pattern>
+                <compartment entity-id="e75eb1ae-a568-4a5f-b75e-3b943d4c0881">
+                    <lane hadOnlyOneElement="false" entity-id="84bf2f32-cf5b-4635-805a-461cbd671780">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="f3aaa942-5fd9-418c-83aa-cc6cb268fdc7">
+                            <properties>
+<property value="Auth Object returned: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="GetChannel-SetPort" entity-id="c34d504c-acb6-4660-897c-d905f0792578">
+                            <properties>
+<property value="" name="returnClass"/>
+<property value="false" name="ignoreBadInput"/>
+<property value="// get the channel S or M from the auth cache&#xA;// in case it's not passed by subsequent calls&#xA;// this call handles both situations&#xA;&#xA;// if sessionVars['TRITON-CHANNEL'] was not already set&#xA;if (sessionVars['TRITON-CHANNEL']!=null) {&#xA;&#x9;// read it from the DBObject returned from mongodb&#xA;&#x9;sessionVars['TRITON-CHANNEL']=payload.channel.value&#xA;&#x9;// note: the channel value is not set when the cache data is being loaded&#xA;    // from webwumst.csv&#xA;&#x9;// Umair to provide that data, and Data Mapper (DM) map must be updated accordingly&#xA;&#x9;// currently the channel field gets an empty string from the DM&#xA;}&#xA;&#xA;if (sessionVars['TRITON-CHANNEL']=='M')&#xA;&#x9;sessionVars['TRITON-PORT']=${triton.moorings.port}&#xA;else {&#xA;&#x9;if (sessionVars['TRITON-CHANNEL']=='S')&#xA;&#x9;&#x9;sessionVars['TRITON-PORT']=${triton.sunsail.port}&#xA;&#x9;else {&#xA;&#x9;&#x9;sessionVars['TRITON-PORT']=0&#xA;&#x9;&#x9;println &quot;Alert: TRITON-PORT = 0&quot;&#xA;&#x9;&#x9;// may be the default should be the moorings port?&#xA;&#x9;}&#xA;}&#xA;&#xA;&#xA;// set a session prop&#xA;return payload" name="text"/>
+<property value="" name="encoding"/>
+<property value="" name="mimeType"/>
+<property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;1957066911">
+    <property value="// get the channel S or M from the auth cache&#xA;// in case it's not passed by subsequent calls&#xA;// this call handles both situations&#xA;&#xA;// if sessionVars['TRITON-CHANNEL'] was not already set&#xA;if (sessionVars['TRITON-CHANNEL']!=null) {&#xA;&#x9;// read it from the DBObject returned from mongodb&#xA;&#x9;sessionVars['TRITON-CHANNEL']=payload.channel.value&#xA;&#x9;// note: the channel value is not set when the cache data is being loaded&#xA;    // from webwumst.csv&#xA;&#x9;// Umair to provide that data, and Data Mapper (DM) map must be updated accordingly&#xA;&#x9;// currently the channel field gets an empty string from the DM&#xA;}&#xA;&#xA;if (sessionVars['TRITON-CHANNEL']=='M')&#xA;&#x9;sessionVars['TRITON-PORT']=${triton.moorings.port}&#xA;else {&#xA;&#x9;if (sessionVars['TRITON-CHANNEL']=='S')&#xA;&#x9;&#x9;sessionVars['TRITON-PORT']=${triton.sunsail.port}&#xA;&#x9;else {&#xA;&#x9;&#x9;sessionVars['TRITON-PORT']=0&#xA;&#x9;&#x9;println &quot;Alert: TRITON-PORT = 0&quot;&#xA;&#x9;&#x9;// may be the default should be the moorings port?&#xA;&#x9;}&#xA;}&#xA;&#xA;&#xA;// set a session prop&#xA;return payload" name="text"/>
+    <property value="true" name="isProcessed$$$$"/>
+</property-collection>
+                            </properties>
+                            <description></description>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/expression-transformer" name="Only-Args" entity-id="b0d53dc5-d26c-4b1e-bce1-57371922d355">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+<property name="evaluator"/>
+<property value="#[header:session:API-METHOD-ARGS]" name="expression"/>
+<property name="custom-evaluator"/>
+<property name="returnSourceIfNull"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger-Auth-Success-w-Token" entity-id="22ad218f-ca0a-425e-9e78-5a923e611409">
+                            <properties>
+<property value="Authenticate OK w TOKEN: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                    </lane>
+                    <lane hadOnlyOneElement="false" entity-id="c492a310-577c-4830-b745-29010b3b5e29">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/object-to-string-transformer" name="Object to String" entity-id="8499a518-1997-4f63-8343-53adeb92c7ad">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="566f2644-8943-40fd-85a0-4205612590ea">
+                            <properties>
+<property value="No Auth Object returned: #[payload:]" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/expression-transformer" name="Expression" entity-id="72f5e4ad-b2fa-45c4-b477-ae169710433e">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+<property value="groovy" name="evaluator"/>
+<property value="false" name="expression"/>
+<property name="custom-evaluator"/>
+<property name="returnSourceIfNull"/>
+                            </properties>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </splitter>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="true/false Logger" entity-id="b24e3407-d15f-4ef6-a69d-cbd1c0359aac">
+                <properties>
+                    <property value="In flow testCacheAvailability: Is Cache Available: #[payload:]" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <scope type="http://www.mulesoft.org/schema/mule/core/catch-exception-strategy" name="Catch Exception Strategy" entity-id="22f336aa-24c9-4755-bfe5-cfcac21253f3">
+                <properties>
+                    <property name=""/>
+                    <property name="when"/>
+                    <property name="enableNotifications"/>
+                </properties>
+                <compartment entity-id="3ba3ef74-f3c1-462a-a574-6e1471293134">
+                    <lane hadOnlyOneElement="false" entity-id="59d28ca4-2fac-487d-9d3a-a8b181152577">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="33a63c0a-6923-478a-9772-d1cc5e5d3cc5">
+                            <properties>
+<property value="Exception: Could not connect to MongoDB (Auth by Token)" name="message"/>
+<property value="INFO" name="level"/>
+<property name="category"/>
+                            </properties>
+                        </pattern>
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/expression-transformer" name="FALSE" entity-id="cf7e35ec-5c01-40ee-a33f-c6034894cace">
+                            <properties>
+<property name="returnClass"/>
+<property name="ignoreBadInput"/>
+<property name="encoding"/>
+<property name="mimeType"/>
+<property name="evaluator"/>
+<property value="false" name="expression"/>
+<property name="custom-evaluator"/>
+<property name="returnSourceIfNull"/>
+                            </properties>
+                        </pattern>
+                    </lane>
+                </compartment>
+            </scope>
+        </lane>
+    </flow>
+    <flow SubFlow="false" name="InvalidAuthentication">
+        <properties>
+            <property name="processingStrategy2"/>
+            <property name="processingStrategy"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+        </properties>
+        <lane hadOnlyOneElement="false" entity-id="4d899a34-0ff1-40af-a0b4-9ffd8945ead9">
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="space holder Logger" entity-id="1c6eedad-dcf1-467a-9797-bfb6a939a692">
+                <properties>
+                    <property value="InvalidAuthentication Authentication: both apikey and token missing or passed simultaneously" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="returning default invalid authentication XML payload" entity-id="cab1206a-1fcd-4f96-ab37-e9363e8a7a14">
+                <properties>
+                    <property value="" name="returnClass"/>
+                    <property value="false" name="ignoreBadInput"/>
+                    <property value="resp = '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;FoobarMethod&gt;&lt;Error&gt;Invalid Authentication: missing apikey or missing token or both apikey and token were passed in the request. Contact TUI Marine Technical support.&lt;/Error&gt;&lt;/FoobarMethod&gt;'&#xA;return resp" name="text"/>
+                    <property value="" name="encoding"/>
+                    <property value="" name="mimeType"/>
+                    <property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;1072806107">
+                        <property value="resp = '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;FoobarMethod&gt;&lt;Error&gt;Invalid Authentication: missing apikey or missing token or both apikey and token were passed in the request. Contact TUI Marine Technical support.&lt;/Error&gt;&lt;/FoobarMethod&gt;'&#xA;return resp" name="text"/>
+                    </property-collection>
+                </properties>
+                <description></description>
+            </pattern>
+        </lane>
+    </flow>
+    <flow SubFlow="false" name="ErrorHandling">
+        <properties>
+            <property value="synchronous" name="processingStrategy2"/>
+            <property value="synchronous" name="processingStrategy"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+        </properties>
+        <lane hadOnlyOneElement="false" entity-id="02b3b136-bd47-4d7c-ac76-568f7b859ade">
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="Logger" entity-id="f7609f96-dfc9-4c0a-ba18-ae6861d1877c">
+                <properties>
+                    <property value="Inside Error Handling..." name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/expression-transformer" name="FALSE" entity-id="e4f9caa5-985f-4b11-80e3-0a38ef3ef76b">
+                <properties>
+                    <property name="returnClass"/>
+                    <property name="ignoreBadInput"/>
+                    <property name="encoding"/>
+                    <property name="mimeType"/>
+                    <property name="evaluator"/>
+                    <property value="false" name="expression"/>
+                    <property name="custom-evaluator"/>
+                    <property name="returnSourceIfNull"/>
+                </properties>
+            </pattern>
+        </lane>
+    </flow>
+    <flow SubFlow="false" name="mule-triton-stub-1-authenticate-call">
+        <properties>
+            <property name="processingStrategy2"/>
+            <property name="processingStrategy"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+        </properties>
+        <lane hadOnlyOneElement="false" entity-id="5b967d5a-6284-4be6-bd65-688ad347928d">
+            <endpoint message-exchange-pattern="OneWay" direction="Inbound" type="http://www.mulesoft.org/schema/mule/vm/endpoint" name="VM" entity-id="16726876-80ae-4f15-b2ce-2f11028bcf6b">
+                <properties>
+                    <property value="one-way" name="exchange-pattern"/>
+                    <property value="request-response" name="exchange-pattern"/>
+                    <property value="triton.stub.Q.1" name="path"/>
+                    <property name="businessEventsLabel"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="address"/>
+                    <property name="responseTimeout"/>
+                    <property name="encoding"/>
+                    <property name="disableTransportTransformer"/>
+                    <property name="mimeType"/>
+                    <property name="connector-ref"/>
+                    <property name="ref"/>
+                    <property name="transformer-refs"/>
+                    <property name="responseTransformer-refs"/>
+                </properties>
+            </endpoint>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="InterfaceToMule-Triton" entity-id="fe0a2d03-bb03-4dbe-86ae-8c5bdcdcaf16">
+                <properties>
+                    <property value="Connect here to Mule-triton for method: #[sessionVars['API-METHOD']]" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="Simulate Triton Response (stub1)" entity-id="c1746436-80c2-458c-a411-3e103d321ac6">
+                <properties>
+                    <property value="" name="returnClass"/>
+                    <property value="false" name="ignoreBadInput"/>
+                    <property value="resp = '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;Auth&gt;&lt;AS400&gt;Active&lt;/AS400&gt;&lt;ApiKey&gt;z2pVJjtm2nHFvX/t1B4GrQ==&lt;/ApiKey&gt;&lt;Status&gt;1&lt;/Status&gt;&lt;Error/&gt;&lt;Token&gt;327352&lt;/Token&gt;&lt;/Auth&gt;'&#xA;return resp" name="text"/>
+                    <property value="" name="encoding"/>
+                    <property value="" name="mimeType"/>
+                    <property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;519944270">
+                        <property value="resp = '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;Auth&gt;&lt;AS400&gt;Active&lt;/AS400&gt;&lt;ApiKey&gt;z2pVJjtm2nHFvX/t1B4GrQ==&lt;/ApiKey&gt;&lt;Status&gt;1&lt;/Status&gt;&lt;Error/&gt;&lt;Token&gt;327352&lt;/Token&gt;&lt;/Auth&gt;'&#xA;return resp" name="text"/>
+                    </property-collection>
+                </properties>
+                <description></description>
+            </pattern>
+        </lane>
+    </flow>
+    <flow SubFlow="false" name="mule-triton-stub-2-subsequent-calls">
+        <properties>
+            <property name="processingStrategy2"/>
+            <property name="processingStrategy"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+        </properties>
+        <lane hadOnlyOneElement="false" entity-id="1064eac9-6544-41c9-a890-5f54a0ed58e2">
+            <endpoint message-exchange-pattern="OneWay" direction="Inbound" type="http://www.mulesoft.org/schema/mule/vm/endpoint" name="VM" entity-id="79981b03-2b53-40b8-9016-3a7eba035297">
+                <properties>
+                    <property value="one-way" name="exchange-pattern"/>
+                    <property value="request-response" name="exchange-pattern"/>
+                    <property value="triton.stub.Q.2" name="path"/>
+                    <property name="businessEventsLabel"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="address"/>
+                    <property name="responseTimeout"/>
+                    <property name="encoding"/>
+                    <property name="disableTransportTransformer"/>
+                    <property name="mimeType"/>
+                    <property name="connector-ref"/>
+                    <property name="ref"/>
+                    <property name="transformer-refs"/>
+                    <property name="responseTransformer-refs"/>
+                </properties>
+            </endpoint>
+            <pattern type="http://www.mulesoft.org/schema/mule/core/logger" name="InterfaceToMule-Triton" entity-id="ffd3fff7-bfdc-449b-b1d0-57e09feade2c">
+                <properties>
+                    <property value="Connect here to Mule-triton for method: #[sessionVars['API-METHOD']]" name="message"/>
+                    <property value="INFO" name="level"/>
+                    <property name="category"/>
+                </properties>
+            </pattern>
+            <pattern type="http://www.mulesoft.org/schema/mule/scripting/groovyTransformer" name="Simulate Triton Response (stub2)" entity-id="048515c6-5e43-427d-9624-a628d0398f7f">
+                <properties>
+                    <property value="" name="returnClass"/>
+                    <property value="false" name="ignoreBadInput"/>
+                    <property value="methodInvoked = sessionVars['API-METHOD']&#xA;resp = '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;AS400&gt;Active&lt;/AS400&gt;&lt;FakePayloadFor' + methodInvoked +'&gt;blahblah&lt;/FakePayloadFor' + methodInvoked +'&gt;&lt;Error/&gt;'&#xA;return resp" name="text"/>
+                    <property value="" name="encoding"/>
+                    <property value="" name="mimeType"/>
+                    <property-collection name="@http://www.mulesoft.org/schema/mule/scripting/script;1127726678">
+                        <property value="methodInvoked = sessionVars['API-METHOD']&#xA;resp = '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;AS400&gt;Active&lt;/AS400&gt;&lt;FakePayloadFor' + methodInvoked +'&gt;blahblah&lt;/FakePayloadFor' + methodInvoked +'&gt;&lt;Error/&gt;'&#xA;return resp" name="text"/>
+                    </property-collection>
+                </properties>
+                <description></description>
+            </pattern>
+        </lane>
+    </flow>
+    <description></description>
+</mule-configuration>

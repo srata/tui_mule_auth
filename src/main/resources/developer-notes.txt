@@ -1,0 +1,28 @@
+Developer Notes:
+
+mongodb util commands:
+
+# mongodb update
+
+// to clear the pseudocode
+db.authentication.update({username:"abermudez"},{ $set: {pseudocode:""}},false, false);
+// to set the pseudocode
+db.authentication.update({username:"abermudez"},{ $set: {pseudocode:"#sessionVars['AUTH-TOKEN']"}},false, false);
+
+// db.collection.update( criteria, objNew, upsert, multi )
+//   criteria - query which selects the record to update;
+//   objNew - updated object or $ operators (e.g., $inc) which manipulate the object
+//   upsert - if this should be an "upsert"; that is, if the record does not exist, insert it
+//   multi - if all documents matching criteria should be updated
+
+
+mule_auth: 
+
+flow1 calls 'AuthenticateWithApiKey' (byRef)
+AuthenticateWithApiKey calls triton, parses the response, then calls: UpdateCacheEntryWithToken
+UpdateCacheEntryWithToken returns true/false
+AuthenticateWithApiKey returns true/false
+but the objective is for flow1 to return to <> XML payloads based on the true/false status returned.
+
+Actually, the payload returned by triton would be good as a success payload
+or some more meaningful error msg could be injected into the xml response for a failure.
